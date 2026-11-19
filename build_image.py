@@ -284,6 +284,59 @@ def pic_justice(d, x, y, s):
     d._image.paste(layer, (int(x + s * 0.28), int(y + s * 0.58)), layer)
 
 
+def pic_drone(d, x, y, s):
+    """Quadcopter drone: X-frame arms, four rotor discs, camera eye."""
+    cx, cy = x + s / 2, y + s / 2
+    hubs = [(x + s * 0.20, y + s * 0.20), (x + s * 0.80, y + s * 0.20),
+            (x + s * 0.20, y + s * 0.80), (x + s * 0.80, y + s * 0.80)]
+    # arms
+    for hx, hy in hubs:
+        d.line([cx, cy, hx, hy], fill=INK, width=6)
+    # rotor discs (blurred blades) with red hubs
+    rw, rh = s * 0.20, s * 0.075
+    for hx, hy in hubs:
+        d.ellipse([hx - rw, hy - rh, hx + rw, hy + rh], outline=INK, width=4)
+        d.ellipse([hx - 5, hy - 5, hx + 5, hy + 5], fill=RED)
+    # body
+    bw, bh = s * 0.34, s * 0.26
+    d.rounded_rectangle([cx - bw / 2, cy - bh / 2, cx + bw / 2, cy + bh / 2],
+                        radius=10, fill=INK)
+    # camera eye slung underneath
+    d.ellipse([cx - 9, cy + bh / 2 - 2, cx + 9, cy + bh / 2 + 16], fill=GOLD,
+              outline=INK, width=3)
+    d.ellipse([cx - 3, cy + bh / 2 + 4, cx + 3, cy + bh / 2 + 10], fill=INK)
+
+
+def pic_ballot(d, x, y, s):
+    """Ballot paper with a bold check sliding into a ballot box."""
+    import math
+    box_top = y + s * 0.56
+    # ballot paper first (the box overlaps its foot, so it reads as inserted)
+    px0, py0 = x + s * 0.30, y + s * 0.04
+    px1, py1 = x + s * 0.70, box_top + 6
+    d.rectangle([px0, py0, px1, py1], fill=WHITE, outline=INK, width=4)
+    # bold red check on the paper
+    d.line([px0 + 9, py0 + (py1 - py0) * 0.46, px0 + (px1 - px0) * 0.40,
+            py1 - 12], fill=RED, width=7)
+    d.line([px0 + (px1 - px0) * 0.40, py1 - 12, px1 - 8, py0 + 12],
+           fill=RED, width=7)
+    # ballot box body
+    d.polygon([(x + s * 0.14, box_top), (x + s * 0.86, box_top),
+               (x + s * 0.79, y + s * 0.97), (x + s * 0.21, y + s * 0.97)],
+              fill=NAVY)
+    # slot lip across the paper's foot
+    d.rectangle([x + s * 0.34, box_top - 2, x + s * 0.66, box_top + 4],
+                fill=INK)
+    # gold star on the box front
+    scx, scy, r_out, r_in = x + s * 0.5, y + s * 0.79, s * 0.11, s * 0.045
+    star = []
+    for i in range(10):
+        r = r_out if i % 2 == 0 else r_in
+        a = -math.pi / 2 + i * math.pi / 5
+        star.append((scx + r * math.cos(a), scy + r * math.sin(a)))
+    d.polygon(star, fill=GOLD)
+
+
 # ----------------------------------------------------------------- layout ----
 def main():
     img = Image.new("RGB", (W, H), PAPER)
@@ -347,16 +400,17 @@ def main():
          "Huang's exit — and its board bars his return."),
         ("MARKETS", pic_chart,
          "DOW PLUNGES 1,000 POINTS",
-         "A tech selloff slams Wall Street as investors dump AI stocks and "
-         "flee into gold."),
-        ("DISASTER", pic_plane,
-         "RUSSIAN MILITARY PLANE CRASHES — 19 DEAD",
-         "A transport aircraft comes down in Siberia, in one of the year's "
-         "deadliest military air disasters."),
-        ("JUSTICE", pic_justice,
-         "27 YEARS FOR IRAN-BACKED TRUMP PLOT",
-         "A U.S. court jails Asif Merchant, who tried to hire a hitman to "
-         "assassinate a U.S. politician for Tehran."),
+         "A tech selloff slams Wall Street — the Dow closes down 849 — and "
+         "gold sinks too, down $122 to $3,728: no safe-haven bid."),
+        ("WAR", pic_drone,
+         "IRAN STRIKES U.S. BASES IN THE GULF",
+         "Drones hit the Ali Al Salem base in Kuwait and sites in Bahrain, "
+         "answering a U.S. strike on Qeshm Island; all are intercepted."),
+        ("ELECTION", pic_ballot,
+         "DEMOCRATS TAKE THE SENATE, 56–44",
+         "Mary Peltola beats Dan Sullivan in the last race to be called — "
+         "the ninth flip, a first Alaska Native senator, and the biggest "
+         "majority since 2009."),
     ]
 
     for idx, (kicker, pic, headline, caption) in enumerate(panels):
